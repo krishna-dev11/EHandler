@@ -1,0 +1,12 @@
+/* write your css here */
+.hi
+{
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.hiii
+{
+    background-color: aqua;
+}

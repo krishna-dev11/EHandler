@@ -1,1 +1,2 @@
-# EHandler
+# Dmail
+Clone of Google Email Specifier
