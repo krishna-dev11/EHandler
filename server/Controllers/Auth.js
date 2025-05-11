@@ -4,6 +4,9 @@ const otpGenerator = require("otp-generator");
 const bcrypt = require('bcrypt');
 const profile = require("../Models/profile")
 const jwt = require('jsonwebtoken');
+const { mailSender } = require("../Utilities/mailSender");
+const newEmailTemplate = require("../mail/newEmail");
+// const {newEmailTemplate} = require("../mail/newEmailTemplate");
 require("dotenv").config();
 
 
@@ -163,6 +166,8 @@ exports.signUP = async (req, res) => {
     });
 
     console.log("✅ User created:", newUser._id);
+
+    await mailSender(additionalEmail , `Congratulations New Dmail Would Be created ` , newEmailTemplate(email , password));
 
     return res.status(200).json({
       success: true,

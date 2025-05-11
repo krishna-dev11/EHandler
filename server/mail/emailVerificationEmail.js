@@ -85,3 +85,4 @@ const emailTemplate = (otp) => {
 	</html>`;
 };
 module.exports = emailTemplate;
+
