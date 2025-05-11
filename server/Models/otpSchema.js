@@ -22,6 +22,8 @@ const otpSchema = new mongoose.Schema({
 
 
 const sendVerificationEmail = async(email , otp)=>{
+
+   console.log(email , otp , " Inside the sendVerificationEmail")
     try{
        await mailSender(email , `Verification mail ` , emailTemplate(otp));
     }catch(error){
@@ -31,7 +33,7 @@ const sendVerificationEmail = async(email , otp)=>{
 
 otpSchema.pre("save" , async function(next){
     try{
-
+        console.log(this.email , this.otp)
         await sendVerificationEmail(this.email , this.otp)
         next()
 

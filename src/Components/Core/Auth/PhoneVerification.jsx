@@ -1,16 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import { sendOtp } from '../../../Services.jsx/Operations/authAPI';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSignUpData } from '../../../Slices/Auth';
 
-const PhoneVerification = () => {
-  const [phone, setPhone] = useState('');
+const EmailVerification = () => {
+  const navigate = useNavigate();
+    const dispatch = useDispatch()
+    const {signUpData} = useSelector(state=>state.auth)
+    console.log(signUpData)
 
-  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    const enteredEmail = data.additionalEmail;
+    console.log(enteredEmail)
+
+    if (!enteredEmail) {
+      toast.error("Please enter an email address.");
+      return;
+    }
+
+    const event = {
+      ...signUpData ,
+      additionalEmail : enteredEmail
+    }
+
+    dispatch(setSignUpData(event))
+
+    // Send OTP to the entered email
+    dispatch(sendOtp( enteredEmail , navigate ));
+    toast.success(`OTP sent to ${enteredEmail}`);
+    navigate("/EnterCode");
+  };
 
   return (
     <div className="min-h-screen bg-[#202124] flex flex-col items-center justify-center relative">
-      
-      <div className="bg-[#1E1E1E] p-8 rounded-2xl w-full max-w-3xl flex flex-col shadow-lg">
-        
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-[#1E1E1E] p-8 rounded-2xl w-full max-w-3xl flex flex-col shadow-lg"
+      >
         {/* Google Logo */}
         <div className="text-3xl text-white font-bold mb-8">
           <span className="text-blue-500">G</span>
@@ -21,50 +56,44 @@ const PhoneVerification = () => {
           <span className="text-red-500">e</span>
         </div>
 
-        {/* Heading */}
         <h1 className="text-4xl text-white font-semibold mb-6">
-          Confirm that you're not a robot
+          Verify your additional email
         </h1>
-
-        {/* Sub Heading */}
-        <p className="text-gray-400 mb-4">Get a verification code sent to your phone</p>
-
-        {/* Input */}
-        <div className="flex items-center space-x-2 mb-2">
-          {/* Flag Dropdown */}
-          <div className="flex items-center border border-gray-500 rounded-md px-3 py-2 bg-transparent">
-            <img 
-              src="https://flagcdn.com/w40/in.png" 
-              alt="India Flag" 
-              className="w-5 h-5 mr-2"
-            />
-            <span className="text-white text-sm">+91</span>
-          </div>
-
-          {/* Phone Number Input */}
-          <input
-            type="text"
-            placeholder="Phone number"
-            className="flex-1 bg-transparent border border-gray-500 rounded-md p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8AB4F8]"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </div>
-
-        {/* Info Text */}
-        <p className="text-gray-500 text-sm mb-6">
-          Google will verify this number via SMS (charges may apply).
+        <p className="text-gray-400 mb-4">
+          A verification code will be sent to the email you provide below.
         </p>
 
-        {/* Next Button */}
+        <label className="mb-6">
+          <p className="mb-1 text-[0.875rem] text-white">
+            Email Address<sup className="text-pink-200">*</sup>
+          </p>
+          <input
+            type="email"
+            placeholder="Enter your email address"
+            {...register("additionalEmail", {
+              required: "Email is required",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Invalid email address",
+              },
+            })}
+            className="w-full rounded-md bg-[#2A2A2A] p-2 text-white"
+          />
+          <div className="text-sm text-red-400 mt-1">
+            {errors.additionalEmail?.message}
+          </div>
+        </label>
+
         <div className="flex justify-end">
-          <button onClick={()=>navigate("/EnterCode")} className="bg-[#8AB4F8] text-black font-medium px-8 py-2 rounded-full hover:bg-[#669df6]">
-            Next
+          <button
+            type="submit"
+            className="bg-[#8AB4F8] text-black font-medium px-8 py-2 rounded-full hover:bg-[#669df6]"
+          >
+            Send OTP
           </button>
         </div>
-      </div>
+      </form>
 
-      {/* Footer */}
       <div className="absolute bottom-4 w-full flex justify-between items-center px-8 text-gray-400 text-sm">
         <div>English (United Kingdom)</div>
         <div className="space-x-4">
@@ -73,9 +102,8 @@ const PhoneVerification = () => {
           <a href="#" className="hover:underline">Terms</a>
         </div>
       </div>
-
     </div>
   );
 };
 
-export default PhoneVerification;
+export default EmailVerification;

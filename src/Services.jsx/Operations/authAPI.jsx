@@ -37,8 +37,7 @@ export function  sendOtp(email , navigate){
                 throw new Error(response.data.message)
               }
 
-            toast.success("OTP SENDED")
-            navigate("/enterOtp")
+            navigate("/EnterCode")
         }catch(error){
             console.log("error in sending OTP")
             console.log(error)
@@ -50,42 +49,65 @@ export function  sendOtp(email , navigate){
     }
 }
 
-export function signUp(firstName , lastName, email , password, confirmPassword, accountType, otp , navigate){
-    return async (dispatch)=>{
-        const toastId = toast.loading("loading...")
-        dispatch(setLoading(true))
-        
-        try{
+export function signUp(data, navigate) {
+  return async (dispatch) => {
+    const toastId = toast.loading("loading...");
+    dispatch(setLoading(true));
 
-            const response = await apiConnector("POST" , SIGNUP_API , {
-                firstName,
-                lastName,
-                email,
-                password,
-                confirmPassword,
-                accountType,
-                otp
-            })
+    try {
+      // Destructure the form data
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        gender,
+        day,
+        month,
+        year,
+        additionalEmail,
+        otp,
+        accountType,
+      } = data;
 
-            // console.log("hiiiiiibyeeee" , firstName , lastName, email , password, confirmPassword, accountType , otp)
+      // Construct dateOfBirth in yyyy-mm-dd format
+    //   const dateOfBirth = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
-           if (!response.data || !response.data.success) {
-               throw new Error(response.data?.message || "Unknown error occurred");
-            }
+      // Prepare API payload matching backend expectations
+      const response = await apiConnector("POST", SIGNUP_API, {
+        firstName,
+        lastName,
+        email,
+        day,
+        month ,
+        year,
+        password,
+        confirmPassword,
+        gender,
+        additionalEmail,
+        otp,
+        accountType: accountType || "Student",
+      });
 
-            toast.success("SignUp Successful")
-            navigate('/login')
+      // Handle API response
+      if (!response.data || !response.data.success) {
+        throw new Error(response.data?.message || "Unknown error occurred");
+      }
 
-        }catch(error){
-
-            console.log(error)
-            console.log("eror in SignUp")
-
-        }
-        dispatch(setLoading(false))
-        toast.dismiss(toastId)
+      toast.success("SignUp Successful");
+      navigate("/Authentication");
+    } catch (error) {
+      console.error("Error in SignUp:", error);
+      toast.error("Signup failed: " + error.message);
     }
+
+    dispatch(setLoading(false));
+    toast.dismiss(toastId);
+  };
 }
+
+
 
 export function setLogin(email , password , navigate){
     return async (dispatch)=>{

@@ -1,83 +1,144 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { sendOtp, signUp } from '../../../Services.jsx/Operations/authAPI';
+import { setSignUpData } from '../../../Slices/Auth';
 
 const EnterCode = () => {
-  const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
+  const [codeSent, setCodeSent] = useState(false);
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { signUpData } = useSelector((state) => state.auth);
+  console.log(signUpData);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
+
+  // Uncomment this useEffect if you want the timer functionality
   useEffect(() => {
+    let interval;
     if (timer > 0) {
-      const interval = setInterval(() => setTimer(timer - 1), 1000);
-      return () => clearInterval(interval);
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     }
+    return () => clearInterval(interval);
   }, [timer]);
 
+  const onSubmit = (event) => {
+    console.log('Code entered:', event.code);
+
+    const data = {
+      ...signUpData,
+      otp: event.code,
+    };
+
+    dispatch(setSignUpData(data));
+
+    console.log(data);
+    console.log(signUpData);
+
+    dispatch(signUp(data, navigate));
+  };
+
+  const handleResendCode = () => {
+    if (timer === 0) {
+      setTimer(30);
+      reset({ code: '' });
+      setCodeSent(false);
+      dispatch(sendOtp(signUpData.additionalEmail))
+      console.log('New code sent');
+    }
+  };
+
+
   return (
-    <div className="min-h-screen bg-[#202124] flex flex-col items-center justify-center relative">
-      
-      <div className="bg-[#1E1E1E] p-8 rounded-2xl w-full max-w-4xl flex flex-col md:flex-row justify-between items-start shadow-lg">
-
-        {/* Left Side */}
-        <div className="mb-8 md:mb-0">
-          {/* Google Logo */}
-          <div className="text-3xl text-white font-bold mb-8">
-            <span className="text-blue-500">G</span>
-            <span className="text-red-500">o</span>
-            <span className="text-yellow-500">o</span>
-            <span className="text-blue-500">g</span>
-            <span className="text-green-500">l</span>
-            <span className="text-red-500">e</span>
+    <div className="min-h-screen bg-[#202124] flex items-center justify-center px-4">
+      <div className="bg-black rounded-2xl p-8 w-full max-w-3xl shadow-lg flex justify-between items-start">
+        {/* Left Section */}
+        <div className="w-1/2 pr-8">
+          <div className="text-4xl font-bold mb-8">
+            <span className="text-[#4285F4]">D</span>
+            <span className="text-[#EA4335]">o</span>
+            <span className="text-[#FBBC05]">o</span>
+            <span className="text-[#4285F4]">g</span>
+            <span className="text-[#34A853]">l</span>
+            <span className="text-[#EA4335]">e</span>
           </div>
-
-          {/* Heading */}
-          <h1 className="text-4xl text-white font-semibold">Enter the code</h1>
-        </div>
-
-        {/* Right Side */}
-        <div className="w-full md:w-1/2">
-          {/* Subtext */}
-          <p className="text-gray-400 mb-4">
+          <h1 className="text-4xl text-white font-medium mb-2">
+            Enter the code
+          </h1>
+          <p className="text-white text-sm mb-8">
             Enter the 6-digit verification code to confirm that you received the text message
           </p>
-
-          {/* Input Field */}
-          <div className="relative mb-6">
-            <label className="absolute text-blue-400 text-sm px-2 -top-3 left-3 bg-[#1E1E1E]">
-              Enter code
-            </label>
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full border border-[#8AB4F8] rounded-md bg-transparent p-4 text-white focus:outline-none"
-              placeholder="G-"
-            />
-          </div>
-
-          {/* Timer or Get new code */}
-          <p className={`text-gray-500 mb-6 ${timer > 0 ? 'cursor-not-allowed' : 'cursor-pointer hover:underline'}`}>
-            {timer > 0 ? `Get new code (${timer} seconds)` : 'Get new code'}
-          </p>
-
-          {/* Next Button */}
-          <div className="flex justify-end">
-            <button className="bg-[#8AB4F8] text-black font-medium px-8 py-2 rounded-full hover:bg-[#669df6]">
-              Next
-            </button>
-          </div>
         </div>
 
+        {/* Right Section */}
+        <div className="w-1/2">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="G-XXXXXX"
+                className={`w-full px-4 py-2 rounded-md bg-transparent border ${
+                  errors.code ? 'border-red-500' : 'border-gray-600'
+                } text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...register('code', {
+                  required: 'Code is required',
+                  pattern: {
+                    value: /^[0-9]{6}$/,
+                    message: 'Must be 6 digits',
+                  },
+                })}
+                disabled={codeSent}
+              />
+              {errors.code && (
+                <p className="text-red-500 text-sm mt-1">{errors.code.message}</p>
+              )}
+            </div>
+
+            <p
+              className={`text-sm mb-6 ${
+                timer > 0 ? 'text-white cursor-not-allowed' : 'text-[#8AB4F8] hover:underline cursor-pointer'
+              }`}
+              onClick={handleResendCode}
+            >
+              {timer > 0 ? `Get new code (${timer}s)` : 'Get new code'}
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-[#8AB4F8] text-black font-medium px-6 py-2 rounded-full hover:bg-[#669df6] disabled:opacity-60"
+                disabled={codeSent}
+              >
+                {codeSent ? 'Submitted' : 'Next'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-4 w-full flex justify-between items-center px-8 text-gray-400 text-sm">
+      <div className="absolute bottom-4 w-full max-w-3xl flex justify-between text-sm text-gray-400">
         <div>English (United Kingdom)</div>
         <div className="space-x-4">
-          <a href="#" className="hover:underline">Help</a>
-          <a href="#" className="hover:underline">Privacy</a>
-          <a href="#" className="hover:underline">Terms</a>
+          <a href="#" className="hover:underline">
+            Help
+          </a>
+          <a href="#" className="hover:underline">
+            Privacy
+          </a>
+          <a href="#" className="hover:underline">
+            Terms
+          </a>
         </div>
       </div>
-
     </div>
   );
 };

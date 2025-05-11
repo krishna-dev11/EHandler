@@ -10,6 +10,7 @@ import ChooseGmailAddress from "./Components/Core/Auth/ChooseGmailAddress";
 import CreatePassword from "./Components/Core/Auth/CreatePassword";
 import PhoneVerification from "./Components/Core/Auth/PhoneVerification";
 import EnterCode from "./Components/Core/Auth/EnterCode";
+import EmailVerification from "./Components/Core/Auth/EmailVerification";
 
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
         <Route path="/BaiscInfo" element={<BasicInformation/>}/>
         <Route path="/ChooseGmailAddress" element={<ChooseGmailAddress/>}/>
         <Route path="/CreatePassword" element={<CreatePassword/>}/>
-        <Route path="/PhoneVerification" element={<PhoneVerification/>}/>
+        <Route path="/PhoneVerification" element={<EmailVerification/>}/>
         <Route path="/EnterCode" element={<EnterCode/>}/>
 
 

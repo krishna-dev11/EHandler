@@ -1,59 +1,100 @@
 import React from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setSignUpData } from "../../../Slices/Auth";
 
 export default function BasicInformation() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { signUpData } = useSelector((state) => state.auth);
+  console.log(signUpData);
 
-  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
+  const onSubmit = (event) => {
+    const data = {
+      ...signUpData,
+      day: event.day,
+      month: event.month,
+      year: event.year,
+      gender: event.gender,
+    };
+
+    dispatch(setSignUpData(data));
+    navigate("/ChooseGmailAddress");
+  };
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  const years = Array.from({ length: 2025 - 1900 + 1 }, (_, i) => 1900 + i);
 
   return (
-    <div className="min-h-screen bg-[#121212] flex items-center justify-center px-4">
-      <div className="bg-[#1E1E1E] rounded-2xl p-8 w-full max-w-4xl shadow-lg flex flex-col md:flex-row md:justify-between">
-        {/* Left Section: Heading and Subheading */}
-        <div className="flex flex-col space-y-4 mb-8 md:mb-0">
-          {/* Google Logo */}
-          <div className="flex items-center text-5xl font-bold">
-            <span className="text-blue-500">G</span>
-            <span className="text-red-500">o</span>
-            <span className="text-yellow-500">o</span>
-            <span className="text-blue-500">g</span>
-            <span className="text-green-500">l</span>
-            <span className="text-red-500">e</span>
-          </div>
+    <div className="min-h-screen bg-[#202124] flex items-center justify-center px-4">
+      <div className="bg-black rounded-2xl p-8 w-full max-w-3xl shadow-md flex flex-col md:flex-row md:justify-between gap-8">
 
-          {/* Title */}
-          <h1 className="text-2xl font-semibold text-white">Basic information</h1>
-          <p className="text-gray-400">Enter your birthday and gender</p>
+        {/* Left Section */}
+        <div className="flex flex-col space-y-4 max-w-md">
+        <div className="text-3xl font-bold mb-5">
+          <span className="text-[#4285F4]">D</span>
+          <span className="text-[#EA4335]">o</span>
+          <span className="text-[#FBBC05]">o</span>
+          <span className="text-[#4285F4]">g</span>
+          <span className="text-[#34A853]">l</span>
+          <span className="text-[#EA4335]">e</span>
+        </div>
+          <h2 className="text-2xl text-white font-semibold">Basic Information</h2>
+          <p className="text-richblack-300">Enter your birthday and gender</p>
         </div>
 
-        {/* Right Section: Form */}
-        <form className="flex flex-col space-y-4 w-full md:max-w-md">
+        {/* Form Section */}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full md:max-w-md">
+
           {/* Date of Birth */}
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              placeholder="Day"
-              className="w-1/3 bg-transparent border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex gap-2">
+<input
+  type="number"
+  placeholder="Day"
+  {...register("day", {
+    required: true,
+    min: 1,
+    max: 31,
+    validate: (value) => value >= 1 && value <= 31
+  })}
+  className="w-1/3 px-4 py-2 rounded-md bg-richblack-700 text-white border border-richblack-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+
             <select
-              className="w-1/3 bg-transparent border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              {...register("month", { required: true })}
+              className="w-1/3 px-4 py-2 rounded-md bg-richblack-700 text-white border border-richblack-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Month</option>
-              <option value="1">January</option>
-              <option value="2">February</option>
-              <option value="3">March</option>
-              {/* Add more months here */}
+              {months.map((month, index) => (
+                <option key={index} value={index + 1}>{month}</option>
+              ))}
             </select>
-            <input
-              type="text"
-              placeholder="Year"
-              className="w-1/3 bg-transparent border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <select
+              {...register("year", { required: true })}
+              className="w-1/3 px-4 py-2 rounded-md bg-richblack-700 text-white border border-richblack-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Year</option>
+              {years.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Gender Selection */}
+          {/* Gender */}
           <select
-            className="w-full bg-transparent border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            {...register("gender", { required: true })}
+            className="w-full px-4 py-2 rounded-md bg-richblack-700 text-white border border-richblack-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Gender</option>
             <option value="male">Male</option>
@@ -61,17 +102,16 @@ export default function BasicInformation() {
             <option value="other">Other</option>
           </select>
 
-          {/* Why we ask link */}
-          <a href="#" className="text-blue-400 text-sm hover:underline">
+          {/* Info Link */}
+          <a href="#" className="text-sm text-blue-400 hover:underline">
             Why we ask for birthday and gender
           </a>
 
-          {/* Next Button */}
-          <div className="flex justify-end mt-4">
+          {/* Submit Button */}
+          <div className="flex justify-end">
             <button
-              onClick={()=>navigate("/ChooseGmailAddress")}
               type="submit"
-              className="bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded-full transition"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-full transition duration-200"
             >
               Next
             </button>
@@ -80,12 +120,12 @@ export default function BasicInformation() {
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-4 flex flex-col items-center w-full text-gray-400 text-xs space-y-2">
+      <div className="absolute bottom-4 flex flex-col items-center text-richblack-300 text-xs gap-1">
         <div>English (United Kingdom)</div>
-        <div className="flex space-x-4">
-          <span>Help</span>
-          <span>Privacy</span>
-          <span>Terms</span>
+        <div className="flex gap-4">
+          <span className="cursor-pointer hover:underline">Help</span>
+          <span className="cursor-pointer hover:underline">Privacy</span>
+          <span className="cursor-pointer hover:underline">Terms</span>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 exports.mailSender = async(email , title , body)=>{
+ console.log(email , title , body  , " Inside mailSender")
 
   try{
 
@@ -20,7 +21,7 @@ exports.mailSender = async(email , title , body)=>{
         html:`${body}`
     })
 
-    console.log(mailsended);
+    console.log(mailsended , "sussefully");
     return mailsended;
 
   }catch(error){

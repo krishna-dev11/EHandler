@@ -76,8 +76,7 @@ exports.sendOTP = async (req, res) => {
 
 exports.signUP = async (req, res) => {
   try {
-
-    console.log(req.body , "krishna")
+    console.log(req.body, "signUp data");
 
     const {
       firstName,
@@ -85,12 +84,16 @@ exports.signUP = async (req, res) => {
       email,
       password,
       confirmPassword,
+      accountType,
       otp,
-      dateOfBirth,  
-      gender,       
-      phoneNo,  // Added phone number
+      gender,
+      additionalEmail,
+      day,
+      month,
+      year,
     } = req.body;
 
+    // Validate required fields
     if (
       !firstName ||
       !lastName ||
@@ -98,87 +101,88 @@ exports.signUP = async (req, res) => {
       !password ||
       !confirmPassword ||
       !otp ||
-      !dateOfBirth ||  
       !gender ||
-      !phoneNo  // Check for phone number  
+      !day ||
+      !month ||
+      !year ||
+      !additionalEmail
     ) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        message: "Enter all details in signUp form carefully",
+        message: "Please fill all required fields.",
       });
     }
 
     if (password !== confirmPassword) {
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
-        message: "Password and confirmPassword don't match",
+        message: "Password and Confirm Password do not match.",
       });
     }
 
-    const checkUser = await user.findOne({ email: email });
-
-    if (checkUser) {
-      return res.status(401).json({
+    const existingUser = await user.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
         success: false,
-        message: "You are already registered with this email. Please login or use another email address.",
+        message: "User already registered with this email.",
       });
     }
 
-    // Find recent OTP from OTP schema
-    const recentOtp = await OTP.find({ email: email })
-      .sort({ createdAt: -1 })
-      .limit(1);
-
-    console.log(recentOtp , "dipanshu");
-
-    if (recentOtp.length === 0) {
+    const recentOtp = await OTP.find({ email: additionalEmail }).sort({ createdAt: -1 }).limit(1);
+    if (recentOtp.length === 0 || otp !== recentOtp[0].otp) {
       return res.status(400).json({
         success: false,
-        message: "OTP is not found",
-      });
-    } else if (otp !== recentOtp[0].otp) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP is invalid",
+        message: "Invalid or expired OTP.",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create profile with dateOfBirth, gender, and phoneNo
+    // Format date as YYYY-MM-DD
+    const formattedDate = `${year.padStart(4, "0")}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
     const profileDetails = await profile.create({
-      gender: gender,         
-      dateOfBirth: dateOfBirth, 
+      gender,
+      dateOfBirth: formattedDate,
       about: null,
-      contactNumber: phoneNo,  // Store phone number in profile
+      contactNumber: "",
+      countryCode: "",
     });
 
-    // Create the user
-    const createUser = await user.create({
+    const newUser = await user.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
-      phoneNo,  // Store phone number in user schema
+      gender,
+      dateOfBirth: formattedDate,
       imageUrl: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
+      additionalEmail,
+      accountType: accountType || "Student",
       additionalDetails: profileDetails._id,
     });
 
-    console.log("User created successfully");
+    console.log("✅ User created:", newUser._id);
 
     return res.status(200).json({
       success: true,
-      createUser,
-      message: "User signUp successful",
+      user: newUser,
+      message: "User sign-up successful!",
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Signup Error:", error);
     return res.status(500).json({
       success: false,
-      message: "User signUp request failed",
+      message: "Internal Server Error during sign-up",
+      error: error.message,
     });
   }
 };
+
+
+
+
 
 
 exports.login = async (req, res) => {
