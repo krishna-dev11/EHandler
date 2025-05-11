@@ -3,12 +3,10 @@ import "./App.css";
 import Home from "./Pages/Home";
 import Authentication from "./Components/Core/Auth/Authentication";
 import NotFound from "./Components/Common/NotFound";
-import SignUPFnameLname from "./Components/Core/Auth/SignUPFnameLname";
 import CreateGoogleAccount from "./Components/Core/Auth/CreateGoogleAccount";
 import BasicInformation from "./Components/Core/Auth/BasicInformation";
 import ChooseGmailAddress from "./Components/Core/Auth/ChooseGmailAddress";
 import CreatePassword from "./Components/Core/Auth/CreatePassword";
-import PhoneVerification from "./Components/Core/Auth/PhoneVerification";
 import EnterCode from "./Components/Core/Auth/EnterCode";
 import EmailVerification from "./Components/Core/Auth/EmailVerification";
 

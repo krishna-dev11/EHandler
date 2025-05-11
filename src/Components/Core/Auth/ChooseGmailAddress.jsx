@@ -53,7 +53,7 @@ const ChooseGmailAddress = () => {
           {/* Google Logo */}
           <div className="flex items-center mb-8">
             <div className="text-4xl font-bold">
-              <span className="text-[#4285F4]">G</span>
+              <span className="text-[#4285F4]">D</span>
               <span className="text-[#EA4335]">o</span>
               <span className="text-[#FBBC05]">o</span>
               <span className="text-[#4285F4]">g</span>
