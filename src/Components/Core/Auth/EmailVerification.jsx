@@ -36,7 +36,7 @@ const EmailVerification = () => {
 
     // Send OTP to the entered email
     dispatch(sendOtp(enteredEmail, navigate));
-    toast.success(`OTP sent to ${enteredEmail}`);
+    // toast.success(`OTP sent to ${enteredEmail}`);
     navigate("/EnterCode");
   };
 

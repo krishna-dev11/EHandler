@@ -38,6 +38,7 @@ export function  sendOtp(email , navigate){
               }
 
             navigate("/EnterCode")
+            toast.success("Otp Sent Successfully")
         }catch(error){
             console.log("error in sending OTP")
             console.log(error)
